@@ -43,10 +43,10 @@ void BMI::initialize( void ) {
 	if (!ok) {
 		MODM_LOG_ERROR << "Configuration failed!\n";
 	} else {
-  	Exti::connect<AccInt1>(Exti::Trigger::RisingEdge, [&accReady](auto){
+  	Exti::connect<AccInt1>(Exti::Trigger::RisingEdge, [this](auto){
   		accReady = true;
   	});
-  	Exti::connect<GyroInt3>(Exti::Trigger::RisingEdge, [&gyroReady](auto){
+  	Exti::connect<GyroInt3>(Exti::Trigger::RisingEdge, [this](auto){
   		gyroReady = true;
   	});
     initialized = true;
