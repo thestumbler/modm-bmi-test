@@ -30,6 +30,7 @@ using Transport = modm::Bmi088SpiTransport<Spi, CsAcc, CsGyro>;
 using Imu = modm::Bmi088<Transport>;
 Imu imu;
 
+
 void initializeImu()
 {
 	AccInt1::setInput(AccInt1::InputType::PullDown);
@@ -37,8 +38,8 @@ void initializeImu()
 
 	constexpr bool selfTest = true;
 	while (!imu.initialize(selfTest)) {
-		MODM_LOG_ERROR << "Initialization failed, retrying ...\n";
-		modm::delay(500ms);
+		MODM_LOG_ERROR << "Initialization failed, retrying ...\r\n";
+		modm::delay(800ms);
 	}
 
 	bool ok = imu.setAccRate(Imu::AccRate::Rate12Hz_Bw5Hz);
@@ -54,7 +55,7 @@ void initializeImu()
 	ok &= imu.setGyroGpioMap(Imu::GyroGpioMap::Int3DataReady);
 
 	if (!ok) {
-		MODM_LOG_ERROR << "Configuration failed!\n";
+		MODM_LOG_ERROR << "Configuration failed!\r\n";
 	}
 }
 
@@ -63,10 +64,23 @@ int main()
 	Board::initialize();
 	Leds::setOutput();
 	Dma1::enable();
+
+  stlink::Uart::initialize<SystemClock, 921600_Bd>(
+    stlink::Uart::Parity::Disabled,
+    stlink::Uart::WordLength::Bit8 );
+
+
+  using EthCs = GpioC6;
+  using EthInt = GpioB15;
+  using EthRst = GpioB8;
+  EthInt::setInput(Gpio::InputType::PullDown);
+  EthRst::setOutput(Gpio::OutputType::PushPull);
+  EthCs::setOutput(Gpio::OutputType::PushPull);
+
 	Spi::connect<Sck::Sck, Mosi::Mosi, Miso::Miso>();
 	Spi::initialize<Board::SystemClock, 9_MHz, 10_pct>();
 
-	MODM_LOG_INFO << "BMI088 SPI Test\n";
+	MODM_LOG_INFO << "BMI088 SPI Test\r\n";
 	initializeImu();
 
 	std::atomic_bool accReady = false;
@@ -91,11 +105,11 @@ int main()
 
 		if (accResult) {
 			const modm::Vector3f data = accResult->getFloat();
-			MODM_LOG_INFO.printf("Acc  [mg]\tx:\t%5.1f\ty: %5.1f\tz: %5.1f\n", data[0], data[1], data[2]);
+			MODM_LOG_INFO.printf("Acc  [mg]\tx:\t%5.1f\ty: %5.1f\tz: %5.1f\r\n", data[0], data[1], data[2]);
 		}
 		if (gyroResult) {
 			const modm::Vector3f data = gyroResult->getFloat();
-			MODM_LOG_INFO.printf("Gyro [deg/s]\tx:\t%5.2f\ty: %5.2f\tz: %5.2f\n", data[0], data[1], data[2]);
+			MODM_LOG_INFO.printf("Gyro [deg/s]\tx:\t%5.2f\ty: %5.2f\tz: %5.2f\r\n", data[0], data[1], data[2]);
 		}
 	}
 

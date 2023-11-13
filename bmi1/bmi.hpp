@@ -38,13 +38,14 @@ class BMI {
   using Transport = modm::Bmi088SpiTransport<Spi, CsAcc, CsGyro>;
   using Imu = modm::Bmi088<Transport>;
 
+  Imu imu;
+
 	std::atomic_bool accReady = false;
 	std::atomic_bool gyroReady = false;
   bool initialized = false;
   uint32_t nacc_reads = 0;
   uint32_t ngyro_reads = 0;
 
-  Imu imu;
 
   BMI();
 

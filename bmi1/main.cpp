@@ -11,12 +11,26 @@
 
 #include "bmi.hpp"
 
+BMI bmi; // this does work
+
 int main()
 {
 	Board::initialize();
 	Leds::setOutput();
+  // BMI bmi;  // this does NOT work
 
-  BMI bmi;
+  stlink::Uart::initialize<SystemClock, 921600_Bd>(
+      stlink::Uart::Parity::Disabled,
+      stlink::Uart::WordLength::Bit8 );
+
+  // initialize the Wiznet Ethernet module I/O pins,
+  // so they don't interfere with BMI088 module
+  using EthCs = GpioC6;
+  using EthInt = GpioB15;
+  using EthRst = GpioB8;
+  EthInt::setInput(Gpio::InputType::PullDown);
+  EthRst::setOutput(Gpio::OutputType::PushPull);
+  EthCs::setOutput(Gpio::OutputType::PushPull);
 
 	bmi.initialize();
 

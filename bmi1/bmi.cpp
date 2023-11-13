@@ -15,17 +15,18 @@ BMI::BMI()
 {}
 
 void BMI::initialize( void ) {
-
 	Dma1::enable();
 	Spi::connect<Sck::Sck, Mosi::Mosi, Miso::Miso>();
 	Spi::initialize<Board::SystemClock, 9_MHz, 10_pct>();
+  MODM_LOG_ERROR << "BMI088 SPI Test" EOL;
 
 	AccInt1::setInput(AccInt1::InputType::PullDown);
 	GyroInt3::setInput(GyroInt3::InputType::PullDown);
+
 	constexpr bool selfTest = true;
 	while (!imu.initialize(selfTest)) {
-		MODM_LOG_ERROR << "Initialization failed, retrying ...\n";
-		modm::delay(500ms);
+		MODM_LOG_ERROR << "Initialization failed, retrying ..." EOL;
+		modm::delay(800ms);
 	}
 
 	bool ok = imu.setAccRate(Imu::AccRate::Rate12Hz_Bw5Hz);
@@ -41,7 +42,7 @@ void BMI::initialize( void ) {
 	ok &= imu.setGyroGpioMap(Imu::GyroGpioMap::Int3DataReady);
 
 	if (!ok) {
-		MODM_LOG_ERROR << "Configuration failed!\n";
+		MODM_LOG_ERROR << "Configuration failed!" EOL;
 	} else {
   	Exti::connect<AccInt1>(Exti::Trigger::RisingEdge, [this](auto){
   		accReady = true;
